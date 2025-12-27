@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- Program exported to HTML using the KA Project Exporter by @MushyAvocado 
+https://www.khanacademy.org/computer-programming/ka-project-exporter/5195486791385088
+-->
+	
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+	<title>Glitch</title>
+	<style>
+		
+		
+		/* Change the color as you want */
+		:root {
+			--background-color: #000000;
+		}
+		
+		
+		html, body, #wrapper {
+			overflow: hidden;
+			width: 100%;
+		    height: 100%;
+			margin: 0px;
+			padding: 0px;
+		    width: calc(100% + 1px);
+		}
+		
+		body {
+		    background-color: var(--background-color);
+		}
+		
+		
+		canvas {
+			width: fit-content;
+			height: fit-content;
+		}
+		
+		canvas:focus {
+			outline: none;
+		}
+		
+		/* Automatically fits to the remaining height and centers the canvas it contains */
+		#wrapper {
+			padding: 0px;
+			margin: 0px;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			width: 100%;
+		}
+		
+</style>
+</head>
+<body id="wrapper">
+    <!-- Canvases with a class of "sketch" are applied to the program in the order runPJS() is called. -->
+    <canvas class="sketch"></canvas>
+	<!-- Load the PJS library -->
+	<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/Khan/processing-js@master/processing.js"></script>
+	<!-- The exporter script must be loaded before the program script -->
+	<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/Mushy-Avocado/KA-exporter@v1.0.1/exporter.js"></script>
+	<!-- Run Khan Academy program and import PJS -->
+	<audio src = "GalaticRap.mp3"></audio>
+	<script type="application/javascript">
+		
+		
+		function program() {
+		    
+		    title("Glitch");
+		    size(600, 600);
+		    
+		    // All code goes here
+			//The Code[
+			//Basic Variables
+			var scene = 'menu';
+			var clicked;
+			var keys = [];
+			keyPressed = function () {
+			    keys[keyCode] = true;
+			};
+			keyReleased = function () {
+			    keys[keyCode] = false;
+			};
+			var clr = {
+			g:color(0, 255, 217),
+			b:color(0, 0, 0),
+			};    
+			//Player Variables
+			var jump = false;
+			//Game Variables
+			var glitch = false;
+			var glitchCooldown = 10;
+			var cam = {
+			x:0,
+			y:0
+			};    
+			var messages = ["Welcome to Glitch!\nUse the arrow keys or wasd to move.\nGet to the portal to advance to the next level.", "Avoid the spikes!", "Use trampolines to bounce higher!", "But that isn't all there is to this\nplatformer...", "Press space to glitch between worlds!", "Have fun!", "", "", "", "", "", "", ""];
+			
+			//Images[
+			textFont(createFont("monospace"));
+			background(clr.b);
+			fill(clr.g);
+			textAlign(CENTER, CENTER);
+			textSize(100);
+			text("GLITCH", 300, 50);
+			textSize(25);
+			text("By ︎Dipper98",300, 120);
+			var G1 = get(0, 0, 300, 150);
+			
+			background(clr.g);
+			fill(clr.b);
+			textAlign(CENTER, CENTER);
+			textSize(100);
+			text("GLITCH", 300, 50);
+			textSize(25);
+			text("By Dipper98︎", 300, 120);
+			var G2 = get(300, 0, 300, 150);
+			
+			background(clr.b);
+			fill(clr.g);
+			textAlign(CENTER, CENTER);
+			textSize(40);
+			text("> Click to Start <", 300, 50);
+			var C1 = get(0, 0, 300, 100);
+			
+			background(clr.g);
+			fill(clr.b);
+			textAlign(CENTER, CENTER);
+			textSize(40);
+			text("> Click to Start <", 300, 50);
+			var C2 = get(300, 0, 300, 100);
+			//]
+			
+			//Player
+			var Player = function(x,y){
+			    this.x = x;
+			    this.y = y;
+			    this.w = 20;
+			    this.h = 20;
+			    
+			    this.px = 0;
+			    this.py = 0;
+			    
+			    this.xv = 0;
+			    this.yv = 0;
+			    this.grav = 0.32;
+			    
+			    this.canJump = false;
+			    this.jumpPower = 7;
+			};
+			Player.prototype.draw = function() {
+			    if (glitch){
+			    fill(clr.b);
+			    }else{    
+			    fill(clr.g);
+			    }
+			    noStroke();
+			    rect(this.x,this.y,this.w,this.h, 5);
+			    if (glitch){
+			    fill(clr.g);
+			    }else{
+			    fill(clr.b);
+			    }    
+			    if (keys[RIGHT] || keys[68]){
+			    rect(this.x+6,this.y+4,5,12, 40);
+			    rect(this.x+14,this.y+4,5,12, 40);
+			    }else if (keys[LEFT] || keys[65]){
+			    rect(this.x+1,this.y+4, 5, 12, 40);
+			    rect(this.x+8, this.y+4, 5, 12, 40);    
+			    }else{
+			    rect(this.x+4,this.y+4,5,12, 40);
+			    rect(this.x+12,this.y+4,5,12, 40);    
+			    }    
+			};
+			Player.prototype.move = function(){
+			    this.px = this.x;
+			    this.py = this.y;
+			    
+			    this.y += this.yv;
+			    this.yv += this.grav;
+			    
+			    
+			    this.x += this.xv;
+			    this.xv = 0;
+			    if(keys[LEFT] || keys[65]){
+			        this.xv = -3;   
+			    }
+			    if(keys[RIGHT] || keys[68]){
+			        this.xv = 3;   
+			    }
+			    //Ignore above, we didnt change anything.
+			    if(keys[UP] && this.canJump || keys[87] && this.canJump){
+			        this.yv = -this.jumpPower;
+			        this.canJump = false;
+			    }
+			    if (jump){
+			     this.jumpPower = 10;
+			     this.yv = -this.jumpPower;
+			     this.jumpPower = 7;
+			     jump = false;
+			    } 
+			    this.canJump = false;
+			};
+			var player = new Player(200, 200);
+			Player.prototype.collide = function(obj){
+			    if(obj.checkColl(this)){
+			        if(this.py <= obj.y - this.h) {
+			            this.y = obj.y - this.h;    
+			            this.canJump = true;
+			            this.yv=0;
+			        }
+			        else if(this.px >= obj.x + obj.w) {
+			            this.x = obj.x+obj.w;
+			            this.xv = 0;
+			        }
+			        else if(this.px  <= obj.x- this.w) {
+			            this.x = obj.x-this.w;
+			            this.xv = 0;
+			        }
+			        else if(this.py >= obj.y + obj.h){
+			            this.y = this.py;
+			            this.yv = -this.yv;
+			        }
+			    }
+			};
+			
+			//Blocks
+			var rectRect = function(x1,y1,w1,h1,x2,y2,w2,h2){
+			    return(x1 + w1 > x2 && y1 + h1 > y2 && x1 < x2 + w2 && y1 < y2 + h2);    
+			};
+			var blocks = [];
+			var Block = function(x, y, type){
+			this.x = x;
+			this.y = y;
+			this.w = 20;
+			this.h = 20;
+			this.type = type;
+			
+			
+			};
+			Block.prototype.checkColl = function(obj){
+			    return(rectRect(this.x,this.y,this.w,this.h,obj.x,obj.y,obj.w,obj.h));
+			};
+			Block.prototype.display = function() {
+			    switch(this.type){
+			        //Basic Blocks
+			        case 'black-block':
+			            fill(clr.b);
+			            rect(this.x,this.y,this.w,this.h, 5);
+			        break;
+			        case 'green-block':
+			            fill(clr.g);
+			            rect(this.x,this.y,this.w,this.h, 5);
+			        break;
+			        //Green Spikes
+			        case 'green-spike-up':
+			            fill(clr.g);
+			            triangle(this.x,this.y+20,this.x+10,this.y,this.x+20,this.y+20);
+			        break;
+			        case 'green-spike-down':
+			            fill(clr.g);
+			            triangle(this.x,this.y,this.x+10,this.y+20,this.x+20,this.y);
+			        break;
+			        case 'green-spike-left':
+			            fill(clr.g);
+			             triangle(this.x,this.y+10,this.x+20,this.y,this.x+20,this.y+20);
+			        break;
+			        case 'green-spike-right':
+			            fill(clr.g);
+			            triangle(this.x,this.y,this.x,this.y+20,this.x+20,this.y+10);
+			        break;
+			        //Black Spikes
+			        case 'black-spike-up':
+			            fill(clr.b);
+			            triangle(this.x,this.y+20,this.x+10,this.y,this.x+20,this.y+20);
+			        break;
+			        case 'black-spike-down':
+			            fill(clr.b);
+			            triangle(this.x,this.y,this.x+10,this.y+20,this.x+20,this.y);
+			        break;
+			        case 'black-spike-left':
+			            fill(clr.b);
+			            triangle(this.x,this.y+10,this.x+20,this.y,this.x+20,this.y+20);
+			        break;
+			        case 'black-spike-right':
+			            fill(clr.b);
+			            triangle(this.x,this.y,this.x,this.y+20,this.x+20,this.y+10);
+			        break;
+			       //Trampolines
+			        case 'green-trampoline':
+			            fill(clr.g);
+			            arc(this.x+10, this.y+20, this.w, 15, 180, 360);
+			        break;
+			        case 'black-trampoline':
+			            fill(clr.b);
+			            arc(this.x+10, this.y+20, this.w, 15, 180, 360);
+			        break;
+			        //Portal
+			        case 'portal':
+			            fill(242, 0, 255);
+			            ellipse(this.x+10,this.y+10,20,20);
+			            fill(186, 0, 199);
+			            ellipse(this.x+10,this.y+10,15,15);
+			            fill(131, 0, 140);
+			            ellipse(this.x+10,this.y+10,10,10);
+			            fill(100, 0, 107);
+			            ellipse(this.x+10,this.y+10,5,5);
+			        break;
+			    }
+			};
+			
+			//Levels
+			var level = 0;
+			var levels = [
+			    [
+			        'p...........................@',
+			        'ggggggggggggggggggggggggggggg',
+			    ],
+			    [
+			        'p......^............^.......@',
+			        'ggggggggggggggggggggggggggggg',
+			    ],
+			    [
+			        'p..~^^^^^^.......~^^^^^^......@',
+			        'gggggggggg...ggggggggggg...gggg',
+			    ],
+			    [
+			        '..............^^...............',
+			        '............gggg...............',
+			        '.......^^^........^~~^.........',
+			        '.....ggggg........gggg.........',
+			        'p.............................@',
+			        'gggg.......................gggg',
+			    ],
+			    [
+			        'p...^^........|......^^......@',
+			        'gggggggggg...bbb...ggggggggggg',
+			    ],
+			    [
+			        '..............................',
+			        '....|.....^......|............',
+			        '..bbbb...ggg...bbbbb..........',
+			        'pb..................b..||..|..@',
+			        'g....................bbbbbbbbbb',
+			    ],
+			    [
+			        '.............................',
+			        '.............................',
+			        '...............^......||||..@',
+			        'p.....bbb....gggg..bbbbbbbbbb',
+			        'ggg..........................',
+			        '|||||||||||||||||||||||||||||',
+			        'bbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+			        '^^^^^^^^^^^^^^^^^^^^^^^^^^^^^',
+			        'ggggggggggggggggggggggggggggg',
+			    ],
+			    [
+			        '@..||..||.....',
+			        'bbbbbbbbb.....',
+			        '..............',
+			        '..............',
+			        '..............',
+			        '...........^~.',
+			        '...........ggg',
+			        '..............',
+			        '..............',
+			        '..............',
+			        '.......=|.....',
+			        '......bbb.....',
+			        '..............',
+			        '..............',
+			        '..............',
+			        'p...^^....^~..',
+			        'gggggggggggg..',
+			    ],
+			    [
+			        '......................................ggggggggggggg',
+			        '......................................ggggggggggggg',
+			        '......................................ggggggggggggg',
+			        '.......................................vvvvvvvvvvvg',
+			        '..................................................g',
+			        '..................................................g',
+			        '..................................................g',
+			        '..................................................g',
+			        '......................||..||..=...................g',
+			        '....................bbbbbbbbbbb...................g',
+			        'p..^^..^^..~............................~~~..~~~.@g',
+			        'gggggggggggg...........................gggggggggggg',
+			    ],
+			    [
+			        '.......................@',
+			        '..................gggggg',
+			        '...............ggg......',
+			        '..........bbggg.........',
+			        '..........__............',
+			        '........................',
+			        '........................',
+			        '........................',
+			        '..........==............',
+			        '.........(bb/...........',
+			        '..........__............',
+			        'p...g...................',
+			        'ggggg...................',
+			    ],
+			    [
+			        "ggggg....................",
+			        "...vv....................",
+			        "....b....................",
+			        "....b....................",
+			        "....b....................",
+			        "....b....................",
+			        ".........................",
+			        ".........................",
+			        ".........................",
+			        ".........................",
+			        ".........................",
+			        "p.~^.=||||||..|||..||||.@",
+			        "ggggbbbbbbbbbbbbbbbbbbbbb",
+			    ],
+			    [
+			        'p.............................@',
+			        'g....b....g....b....g....b....g',
+			    ],
+			    [
+			        '.....................................',
+			        '.....................^...............',
+			        '.............|....gggg...|...|.......',
+			        'p.^..^....bbbb...........bbbbb...^..@',
+			        'gggggg...........................gggg',
+			    ],
+			    [
+			        '......bbbbbbbbbbb.....................',
+			        '......................................',
+			        '......................................',
+			        '.................................^...g',
+			        '.................................ggg.g',
+			        '........||..||||.=.................g.g',
+			        '......bbbbbbbbbbbb......^^..~......g.g',
+			        '.......................gggggg......g.g',
+			        '...................................g.g',
+			        '...................................g.g',
+			        '...................................g.g',
+			        'p...~..............................g@g',
+			        'ggggg..............................ggg',
+			    ],
+			    [
+			        '..p..',
+			        'ggggg',
+			    ],
+			];
+			
+			//The different blocks
+			var drawLevel = function(){
+			    blocks = [];
+			    for(var i = 0; i < levels[level].length;i++){    
+			        for(var j = 0; j < levels[level][i].length;j++){
+			            switch(levels[level][i][j]){
+			                case 'b':
+			                    blocks.push(new Block(j*20,i*20,'black-block'));
+			                break;
+			                case 'g':
+			                    blocks.push(new Block(j*20,i*20,'green-block'));
+			                break;
+			                case 'p':
+			                    player.x = j*20;
+			                    player.y = i*20;
+			                break;
+			                case '@':
+			                    blocks.push(new Block(j*20,i*20,'portal'));
+			                break;
+			                case '^':
+			                    blocks.push(new Block(j*20, i*20, 'green-spike-up'));
+			                break;
+			                case 'v':
+			                    blocks.push(new Block(j*20, i*20, 'green-spike-down'));
+			                break;
+			                case '<':
+			                    blocks.push(new Block(j*20, i*20, 'green-spike-left'));
+			                break;
+			                case '>':
+			                    blocks.push(new Block(j*20, i*20, 'green-spike-right'));
+			                break;
+			                case '|':
+			                    blocks.push(new Block(j*20, i*20, 'black-spike-up'));
+			                break;
+			                case '_':
+			                    blocks.push(new Block(j*20, i*20, 'black-spike-down'));
+			                break;
+			                case '/':
+			                    blocks.push(new Block(j*20, i*20, 'black-spike-right'));
+			                break;
+			                case "(":
+			                    blocks.push(new Block(j*20, i*20, 'black-spike-left'));
+			                break;
+			                case "~":
+			                    blocks.push(new Block(j*20, i*20, 'green-trampoline'));
+			                break;
+			                case "=":
+			                    blocks.push(new Block(j*20, i*20, 'black-trampoline'));
+			                break;
+			            }    
+			        }
+			    }
+			};
+			drawLevel();
+			
+			var drawMenu = function(){
+			background(clr.g);
+			//The person[
+			fill(clr.b);
+			rect(0, 0, 300, 600);
+			for (var x = 0; x < 600 ; x += 20){
+			if (x > 300){
+			fill(clr.b);
+			}else{
+			fill(clr.g);
+			}    
+			rect(x, 340, 20, 20, 5);
+			}  
+			rectMode(CENTER);
+			rect(300, 300, 300, 300, 40);
+			fill(clr.g);
+			rect(225, 300, 150, 300, 40);
+			noStroke();
+			rect(245, 300, 110, 300);
+			rect(350, 300, 50, 200, 40);
+			fill(clr.b);
+			rect(250, 300, 50, 200, 40);
+			rectMode(LEFT);
+			//]
+			//The text[
+			image(G1, 0, 0);
+			image(G2, 300, 0);
+			image(C1, 0, 470);
+			image(C2, 300, 470);
+			
+			//]
+			if (clicked){
+			scene = 'game';    
+			}    
+			};
+			var drawGame = function(){
+			if (glitch){
+			background(clr.g);
+			}else{
+			background(clr.b);
+			}
+			if (keys[32] && glitchCooldown <= 0 && level > 3){
+			    glitchCooldown = 10;
+			if (glitch){
+			glitch = false;    
+			}else{    
+			glitch = true;
+			}    
+			}    
+			glitchCooldown--;
+			
+			//The Levels
+			pushMatrix();
+			    translate(round(cam.x), round(cam.y));
+			    for(var i = 0; i < blocks.length; i ++){
+			        blocks[i].display();
+			        if(blocks[i].type === 'green-block' && glitch === false || blocks[i].type === "black-block" && glitch){
+			            player.collide(blocks[i]);
+			        }
+			        if(blocks[i].checkColl(player)){
+			            switch(blocks[i].type){
+			                case 'portal':
+			                    level ++;
+			                    drawLevel();
+			                    glitch = false;
+			                break;
+			                case 'green-spike-up':
+			                    if (glitch === false){
+			                    drawLevel();
+			                    }    
+			                break;
+			                case 'green-spike-down':
+			                    if (glitch === false){
+			                    drawLevel();
+			                    }    
+			                break;
+			                case 'green-spike-left':
+			                    if (glitch === false){
+			                    drawLevel();
+			                    }    
+			                break;
+			                case 'green-spike-right':
+			                    if (glitch === false){
+			                    drawLevel();
+			                    }    
+			                break;
+			                case 'black-spike-up':
+			                    if (glitch){
+			                    drawLevel();
+			                    glitch = false;
+			                    }    
+			                break;
+			                case 'black-spike-down':
+			                    if (glitch){
+			                    drawLevel();
+			                    glitch = false;
+			                    }    
+			                break;
+			                case 'black-spike-left':
+			                    if (glitch){
+			                    drawLevel();
+			                    glitch = false;
+			                    }    
+			                break;
+			                case 'black-spike-right':
+			                    if (glitch){
+			                    drawLevel();
+			                    glitch = false;
+			                    }    
+			                break;
+			                case 'green-trampoline':
+			                    if (glitch === false){
+			                    jump = true;
+			                    }    
+			                break;
+			                case 'black-trampoline':
+			                    if (glitch){
+			                    jump = true;
+			                    }    
+			                break;
+			        }
+			    }
+			    }
+			    player.draw();
+			    player.move();
+			popMatrix();
+			cam.x = lerp(cam.x, 300-player.x, 0.05);
+			cam.y = lerp(cam.y, 300-player.y, 0.05);
+			
+			//Text
+			if (glitch){
+			    fill(clr.b);
+			}else{    
+			    fill(clr.g);
+			    } 
+			textAlign(CENTER,CENTER);
+			textSize(20);
+			text(messages[level], 300, 40);  
+			text("Level: "+(level + 1)+"/50", 80, 575);
+			
+			if (player.y > 700){
+			drawLevel();  
+			glitch = false;
+			}    
+			
+			};
+			
+			draw = function(){
+			    switch(scene){
+			    case 'menu':
+			    drawMenu();
+			    break;
+			    case 'game':
+			    drawGame();
+			    break;
+			    } 
+			    clicked = false;
+			};
+			mouseClicked = function(){
+			clicked = true;    
+			};    
+			//]  
+		}
+		
+		runPJS(program);
+		
+		// Add reload button on KA --> <script>
+		
+	</script>
+</body>
+
+</html>
